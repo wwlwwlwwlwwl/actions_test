@@ -30,6 +30,8 @@ jobs:
       working-directory: /workdir
       run: |
         git clone --recursive --depth 1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
+        pwd
+        ls clang/bin
     
     - name: Get source code
       id: code
@@ -45,9 +47,7 @@ jobs:
       run: |
         df -hT $PWD
         export PATH=/workdir/clang/bin:$PATH
-        export ARCH=arm64
-        export SUBARCH=arm64
-        export CLANG_CMDLINE="-j$(nproc) O=out ARCH=arm64 CC=clang CXX=clang++ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LD=ld.lld"
+        export CLANG_CMDLINE="-j$(nproc) O=out ARCH=arm64 CC=/workdir/clang/bin/clang CXX=/workdir/clang/bin/clang++ CROSS_COMPILE_ARM32=/workdir/clang/bin/arm-linux-gnueabi- CLANG_TRIPLE=/workdir/clang/bin/aarch64-linux-gnu- CROSS_COMPILE=/workdir/clang/bin/aarch64-linux-gnu- LD=/workdir/clang/bin/ld.lld"
         cd kernel
         echo "Configure kernel config"
         sudo time make $CLANG_CMDLINE vendor/venus-qgki_defconfig
