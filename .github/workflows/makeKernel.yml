@@ -24,7 +24,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@main
-
+    
     - name: Prepare Clang
       id: clang
       working-directory: /workdir
@@ -33,7 +33,7 @@ jobs:
         git clone --rescursive --depth=1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
         echo '::set-output name=action_echo::enabled'
         echo "::set-output name=status::success"
-
+    
     - name: Get source code
       id: code
       working-directory: /workdir
@@ -43,7 +43,7 @@ jobs:
         git clone --rescursive --depth=1 https://github.com/wwlwwlwwlwwl/kernel_xiaomi_venus.git kernel
         echo '::set-output name=action_echo::enabled'
         echo "::set-output name=status::success"
-
+    
     - name: Compile the kernel
       id: compile
       if: steps.code.outputs.status == 'success'
@@ -61,18 +61,18 @@ jobs:
         mv out/arch/arm64/boot/Image /workdir/upload
         echo '::set-output name=action_echo::enabled'
         echo "::set-output name=status::success"
-
+    
     - name: Check space usage
       if: (!cancelled()) && steps.compile.outputs.status == 'success'
       run: df -hT
-
+    
     - name: Upload
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_DIR == 'true'
       with:
         name: Image
         path: /workdir/upload
-        
+    
     - name: Delete workflow runs
       uses: GitRML/delete-workflow-runs@main
       with:
