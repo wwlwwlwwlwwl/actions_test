@@ -15,7 +15,7 @@ on:
 env:
   UPLOAD_DIR: true
   TZ: Asia/Shanghai
-#  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
 jobs:
   build:
@@ -35,8 +35,8 @@ jobs:
       working-directory: /workdir
       run: |
         git clone --recursive --depth 1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
-        echo "/workdir/clang/bin" >> $GITHUB_PATH
-#        echo "::add-path::/workdir/clang/bin"
+#        echo "/workdir/clang/bin" >> $GITHUB_PATH
+        echo "::add-path::/workdir/clang/bin"
     
     - name: Get source code
       id: code
@@ -49,8 +49,6 @@ jobs:
       id: compile
       if: (!cancelled()) && success()
       working-directory: /workdir
-      env: 
-        PATH: "/workdir/clang/bin:$PATH"
       run: |
         df -hT $PWD
         export CLANG_CMDLINE="-j$(nproc) O=out ARCH=arm64 CC=clang CXX=clang++ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LD=ld.lld"
