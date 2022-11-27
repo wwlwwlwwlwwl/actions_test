@@ -29,7 +29,7 @@ jobs:
       id: clang
       working-directory: /workdir
       run: |
-        git clone --rescursive --depth=1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
+        git clone --recursive --depth 1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
         echo '::set-output name=action_echo::enabled'
         echo "::set-output name=clang::success"
     
@@ -38,7 +38,7 @@ jobs:
       working-directory: /workdir
       if: steps.check.outputs.clang == 'success'
       run: |
-        git clone --rescursive --depth=1 https://github.com/wwlwwlwwlwwl/kernel_xiaomi_venus.git kernel
+        git clone --recursive --depth 1 https://github.com/wwlwwlwwlwwl/kernel_xiaomi_venus.git kernel
         echo '::set-output name=action_echo::enabled'
         echo "::set-output name=code::success"
     
