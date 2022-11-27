@@ -21,31 +21,33 @@ jobs:
     runs-on: ubuntu-latest
     container: docker.io/qctt/kernelbuild:debian12
     
-    steps: 
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+    
     - name: Prepare Clang
       id: clang
       working-directory: /workdir
-      if: steps.check.outputs.status == 'success'
       run: |
         git clone --rescursive --depth=1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
         echo '::set-output name=action_echo::enabled'
-        echo "::set-output name=status::success"
+        echo "::set-output name=clang::success"
     
     - name: Get source code
       id: code
       working-directory: /workdir
-      if: steps.check.outputs.status == 'success'
+      if: steps.check.outputs.clang == 'success'
       run: |
-        df -hT $PWD
         git clone --rescursive --depth=1 https://github.com/wwlwwlwwlwwl/kernel_xiaomi_venus.git kernel
         echo '::set-output name=action_echo::enabled'
-        echo "::set-output name=status::success"
+        echo "::set-output name=code::success"
     
     - name: Compile the kernel
       id: compile
-      if: steps.code.outputs.status == 'success'
+      if: steps.code.outputs.code == 'success'
       working-directory: /workdir
       run: |
+        df -hT $PWD
         export PATH=/workdir/clang/bin:$PATH
         export ARCH=arm64
         export SUBARCH=arm64
@@ -57,15 +59,15 @@ jobs:
         sudo time make $CLANG_CMDLINE
         mv out/arch/arm64/boot/Image /workdir/upload
         echo '::set-output name=action_echo::enabled'
-        echo "::set-output name=status::success"
+        echo "::set-output name=compile::success"
     
     - name: Check space usage
-      if: (!cancelled()) && steps.compile.outputs.status == 'success'
+      if: (!cancelled()) && steps.compile.outputs.compile == 'success'
       run: df -hT
     
     - name: Upload
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_DIR == 'true'
+      if: steps.compile.outputs.compile == 'success' && env.UPLOAD_DIR == 'true'
       with:
         name: Image
         path: /workdir/upload
