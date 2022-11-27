@@ -30,10 +30,9 @@ jobs:
       working-directory: /workdir
       if: steps.check.outputs.status == 'success'
       run: |
-         git clone --rescursive --depth=1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
+        git clone --rescursive --depth=1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
         echo '::set-output name=action_echo::enabled'
         echo "::set-output name=status::success"
-
 
     - name: Get source code
       id: code
