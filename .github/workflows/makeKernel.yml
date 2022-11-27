@@ -21,10 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     container: docker.io/qctt/kernelbuild:debian12
     
-    steps:
-    - name: Checkout
-      uses: actions/checkout@main
-    
+    steps: 
     - name: Prepare Clang
       id: clang
       working-directory: /workdir
