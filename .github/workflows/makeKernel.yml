@@ -50,7 +50,7 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        export CLANG_CMDLINE="-j$(nproc) O=out ARCH=arm64 CC=/workdir/clang/bin/clang CXX=/workdir/clang/bin/clang++ CROSS_COMPILE_ARM32=/workdir/clang/bin/arm-linux-gnueabi- CLANG_TRIPLE=/workdir/clang/bin/aarch64-linux-gnu- CROSS_COMPILE=/workdir/clang/bin/aarch64-linux-gnu- LD=/workdir/clang/bin/ld.lld"
+        export CLANG_CMDLINE="-j$(nproc) O=out ARCH=arm64 CC=clang CXX=clang++ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LD=ld.lld"
         cd kernel
         echo "Configure kernel config"
         sudo time make $CLANG_CMDLINE vendor/venus-qgki_defconfig
