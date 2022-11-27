@@ -33,7 +33,7 @@ jobs:
       id: clang
       working-directory: /workdir
       run: |
-          #TODO submodule
+#        TODO submodule
         git clone --recursive --depth 1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
 #        echo "/workdir/clang/bin" >> $GITHUB_PATH
         echo "::add-path::/workdir/clang/bin"
