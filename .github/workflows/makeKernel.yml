@@ -28,12 +28,12 @@ jobs:
       with:
         submodules: 'recursive'
         fetch-depth: 0
-    
+        
+#        TODO submodule
     - name: Prepare Clang
       id: clang
       working-directory: /workdir
       run: |
-#        TODO submodule
         git clone --recursive --depth 1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
         export PATH="/workdir/clang/bin:$PATH"
         echo $PATH >> $GITHUB_PATH
