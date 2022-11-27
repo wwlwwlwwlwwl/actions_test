@@ -28,12 +28,12 @@ jobs:
         submodules: 'recursive'
         fetch-depth: 0
     
+    #TODO submodule
     - name: Prepare Clang
       id: clang
       working-directory: /workdir
       run: |
         git clone --recursive --depth 1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
-        echo "/workdir/clang/bin" >> $GITHUB_PATH
     
     - name: Get source code
       id: code
@@ -49,14 +49,13 @@ jobs:
       run: |
         df -hT $PWD
         export CLANG_CMDLINE="-j$(nproc) O=out ARCH=arm64 CC=clang CXX=clang++ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LD=ld.lld"
+        echo "/workdir/clang/bin" >> $GITHUB_PATH
         cd kernel
         echo "Configure kernel config"
         sudo time make $CLANG_CMDLINE vendor/venus-qgki_defconfig
         echo -e "Start compile with cmdline: $CLANG_CMDLINE"
         sudo time make $CLANG_CMDLINE
         mv out/arch/arm64/boot/Image /workdir/upload
-        echo '::set-output name=action_echo::enabled'
-        echo "::set-output name=compile::success"
     
     - name: Check space usage
       if: (!cancelled()) && success()
