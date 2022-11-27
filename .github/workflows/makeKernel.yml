@@ -1,0 +1,81 @@
+#
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
+# Description: Build Kernel using GitHub Actions
+# Change from P3TERX
+# Based on: https://github.com/ylx2016/kernel/blob/master/.github/workflows/Debian_kernel_latest.yml
+#
+
+name: Make Venus Kernel
+
+on:
+  workflow_dispatch:
+
+env:
+  UPLOAD_DIR: true
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: docker.io/qctt/kernelbuild:debian12
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Prepare Clang
+      id: clang
+      working-directory: /workdir
+      if: steps.check.outputs.status == 'success'
+      run: |
+         git clone --rescursive --depth=1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
+        echo '::set-output name=action_echo::enabled'
+        echo "::set-output name=status::success"
+
+
+    - name: Get source code
+      id: code
+      working-directory: /workdir
+      if: steps.check.outputs.status == 'success'
+      run: |
+        df -hT $PWD
+        git clone --rescursive --depth=1 https://github.com/wwlwwlwwlwwl/kernel_xiaomi_venus.git kernel
+        echo '::set-output name=action_echo::enabled'
+        echo "::set-output name=status::success"
+
+    - name: Compile the kernel
+      id: compile
+      if: steps.code.outputs.status == 'success'
+      working-directory: /workdir
+      run: |
+        export PATH=/workdir/clang/bin:$PATH
+        export ARCH=arm64
+        export SUBARCH=arm64
+        export CLANG_CMDLINE="-j$(nproc) O=out ARCH=arm64 CC=clang CXX=clang++ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LD=ld.lld"
+        cd kernel
+        echo "Configure kernel config"
+        sudo time make $CLANG_CMDLINE vendor/venus-qgki_defconfig
+        echo -e "Start compile with cmdline: $CLANG_CMDLINE"
+        sudo time make $CLANG_CMDLINE
+        mv out/arch/arm64/boot/Image /workdir/upload
+        echo '::set-output name=action_echo::enabled'
+        echo "::set-output name=status::success"
+
+    - name: Check space usage
+      if: (!cancelled()) && steps.compile.outputs.status == 'success'
+      run: df -hT
+
+    - name: Upload
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_DIR == 'true'
+      with:
+        name: Image
+        path: /workdir/upload
+        
+    - name: Delete workflow runs
+      uses: GitRML/delete-workflow-runs@main
+      with:
+        retain_days: 1
+        keep_minimum_runs: 10
