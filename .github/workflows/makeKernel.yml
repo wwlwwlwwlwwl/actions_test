@@ -15,7 +15,6 @@ on:
 env:
   UPLOAD_DIR: true
   TZ: Asia/Shanghai
-#  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
 jobs:
   build:
@@ -29,22 +28,20 @@ jobs:
         submodules: 'recursive'
         fetch-depth: 0
         
-#        TODO submodule
-    - name: Prepare Clang
-      id: clang
-      working-directory: /workdir
-      run: |
-        git clone --recursive --depth 1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
-        export PATH="/workdir/clang/bin:$PATH"
-        echo $PATH >> $GITHUB_PATH
-#        echo "::add-path::/workdir/clang/bin"
+#    - name: Prepare Clang
+#      id: clang
+#      working-directory: /workdir
+#      run: |
+#        git clone --recursive --depth 1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
+#        export PATH="/workdir/clang/bin:$PATH"
+#        echo $PATH >> $GITHUB_PATH
     
-    - name: Get source code
-      id: code
-      working-directory: /workdir
-      if: (!cancelled()) && success()
-      run: |
-        git clone --recursive --depth 1 https://github.com/wwlwwlwwlwwl/kernel_xiaomi_venus.git kernel
+#    - name: Get source code
+#      id: code
+#      working-directory: /workdir
+#      if: (!cancelled()) && success()
+#      run: |
+#        git clone --recursive --depth 1 https://github.com/wwlwwlwwlwwl/kernel_xiaomi_venus.git kernel
         
     - name: Compile the kernel
       id: compile
@@ -52,9 +49,10 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
+        export PATH="/workdir/clang/bin:$PATH"
+        echo $PATH >> $GITHUB_PATH
         export CLANG_CMDLINE="-j$(nproc) O=out ARCH=arm64 CC=clang CXX=clang++ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LD=ld.lld"
         cd kernel
-        echo -e "Path: $PATH"
         echo "Configure kernel config"
         make $CLANG_CMDLINE vendor/venus-qgki_defconfig
         echo -e "Start compile with cmdline: $CLANG_CMDLINE"
