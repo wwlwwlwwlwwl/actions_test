@@ -1,0 +1,6 @@
+[submodule "clang"]
+	path = clang
+	url = git@github.com:wwlwwlwwlwwl/prelude-clang.git
+[submodule "kernel"]
+	path = kernel
+	url = git@github.com:wwlwwlwwlwwl/kernel_xiaomi_venus.git
