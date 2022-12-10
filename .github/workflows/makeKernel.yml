@@ -32,7 +32,7 @@ jobs:
       id: clang
       working-directory: /workdir
       run: |
-        git clone --recursive --depth 1 https://github.com/wwlwwlwwlwwl/prelude-clang.git clang
+        git clone --recursive --depth 1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
         export PATH="/workdir/clang/bin:$PATH"
         echo $PATH >> $GITHUB_PATH
     
@@ -53,7 +53,7 @@ jobs:
         cd kernel
         echo "Configure kernel config"
         make $CLANG_CMDLINE vendor/venus-qgki_defconfig
-        echo -e "Start compile with cmdline: $CLANG_CMDLINE"
+        echo "Start compile with cmdline: $CLANG_CMDLINE"
         make $CLANG_CMDLINE
         mv out/arch/arm64/boot/Image /workdir/upload
     
