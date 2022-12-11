@@ -52,7 +52,7 @@ jobs:
         export CLANG_CMDLINE="-j$(nproc) O=out ARCH=arm64 CC=clang CXX=clang++ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LD=ld.lld"
         cd kernel
         echo "Configure kernel config"
-        make $CLANG_CMDLINE vendor/venus-qgki_defconfig
+        make $CLANG_CMDLINE vendor/venus-Docker_defconfig
         echo "Start compile with cmdline: $CLANG_CMDLINE"
         make $CLANG_CMDLINE
         mv out/arch/arm64/boot/Image /workdir/upload
