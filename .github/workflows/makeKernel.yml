@@ -11,6 +11,10 @@ name: Make Venus Kernel
 
 on:
   workflow_dispatch:
+    configFile:
+        description: 'Kernel Config'     
+        required: true
+        default: 'vendor/venus-Docker_defconfig'
 
 env:
   UPLOAD_DIR: true
@@ -56,11 +60,11 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        export CLANG_CMDLINE="-j$(nproc) O=out ARCH=arm64 CC=clang CXX=clang++ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LD=ld.lld"
+        export CLANG_CMDLINE="-j$(nproc --all) O=out ARCH=arm64 CC=clang CXX=clang++ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LD=ld.lld"
         cd kernel
         echo "=====Compile Start====="
         echo "Configure kernel config"
-        make $CLANG_CMDLINE vendor/venus-Docker_defconfig
+        make $CLANG_CMDLINE ${{ github.event.inputs.configFile }}
         echo "Start compile with cmdline: $CLANG_CMDLINE"
         make $CLANG_CMDLINE
         echo "=====Compile End====="
