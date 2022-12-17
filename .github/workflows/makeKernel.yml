@@ -28,7 +28,7 @@ jobs:
 #        submodules: 'recursive'
         fetch-depth: 0
         
-    - name: Prepare Clang
+    - name: Get Prelude Clang
       id: clang
       working-directory: /workdir
       run: |
@@ -43,6 +43,13 @@ jobs:
       run: |
         git clone --recursive --depth 1 https://github.com/wwlwwlwwlwwl/kernel_xiaomi_venus.git kernel
         
+    - name: Get Anykernel
+      id: anykernel
+      working-directory: /workdir
+      if: (!cancelled()) && success()
+      run: |
+        git clone --recursive --depth 1 https://github.com/wwlwwlwwlwwl/AnyKernel3.git AnyKernel
+         
     - name: Compile the kernel
       id: compile
       if: (!cancelled()) && success()
@@ -51,22 +58,27 @@ jobs:
         df -hT $PWD
         export CLANG_CMDLINE="-j$(nproc) O=out ARCH=arm64 CC=clang CXX=clang++ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LD=ld.lld"
         cd kernel
+        echo "=====Compile Start====="
         echo "Configure kernel config"
         make $CLANG_CMDLINE vendor/venus-Docker_defconfig
         echo "Start compile with cmdline: $CLANG_CMDLINE"
         make $CLANG_CMDLINE
-        mv out/arch/arm64/boot/Image /workdir/upload
+        echo "=====Compile End====="
     
-    - name: Check space usage
+    - name: Package kernel with AnyKernel
+      id: package
       if: (!cancelled()) && success()
-      run: df -hT
+      working-directory: /workdir/kernel/out
+      run: |
+        cp -v arch/arm64/boot/Image /workdir/AnyKernel
+        cp -v $(cat modules.order) /workdir/AnyKernel/modules/system/lib/modules       
     
     - name: Upload
       uses: actions/upload-artifact@main
       if: (!cancelled()) && success() && env.UPLOAD_DIR == 'true'
       with:
-        name: Image
-        path: /workdir/upload
+        name: AnyKernel
+        path: /workdir/AnyKernel
     
     - name: Delete workflow runs
       uses: GitRML/delete-workflow-runs@main
