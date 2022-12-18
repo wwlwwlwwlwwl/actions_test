@@ -1,0 +1,96 @@
+#
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
+# Description: Build Kernel using GitHub Actions
+# Change from P3TERX
+# Based on: https://github.com/ylx2016/kernel/blob/master/.github/workflows/Debian_kernel_latest.yml
+#
+
+name: Debug CI
+
+on:
+  workflow_dispatch:
+    inputs:
+    kernelURL:
+        description: 'Kernel URL'     
+        required: true
+        default: 'https://github.com/Evolution-X-Devices/kernel_xiaomi_venus.git'
+      configFile:
+        description: 'Kernel Config'     
+        required: true
+        default: 'vendor/venus-qgki_defconfig'
+
+env:
+  UPLOAD_DIR: true
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: docker.io/qctt/kernelbuild:debian12
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+      with:
+#        submodules: 'recursive'
+        fetch-depth: 0
+        
+    - name: Get Prelude Clang
+      id: clang
+      working-directory: /workdir
+      run: |
+        git clone --recursive --depth 1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
+        export PATH="/workdir/clang/bin:$PATH"
+        echo $PATH >> $GITHUB_PATH
+    
+    - name: Get source code
+      id: code
+      working-directory: /workdir
+      if: (!cancelled()) && success()
+      run: |
+        git clone --recursive --depth 1 ${{ github.event.inputs.kernelURL }} kernel
+        
+    - name: Get Anykernel
+      id: anykernel
+      working-directory: /workdir
+      if: (!cancelled()) && success()
+      run: |
+        git clone --recursive --depth 1 https://github.com/wwlwwlwwlwwl/AnyKernel3.git AnyKernel
+         
+    - name: Compile the kernel
+      id: compile
+      if: (!cancelled()) && success()
+      working-directory: /workdir
+      run: |
+        df -hT $PWD
+        export CLANG_CMDLINE="-j$(nproc --all) O=out ARCH=arm64 CC=clang CXX=clang++ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LD=ld.lld"
+        cd kernel
+        echo "=====Compile Start====="
+        echo "Configure kernel config"
+        make $CLANG_CMDLINE ${{ github.event.inputs.configFile }}
+        echo "Start compile with cmdline: $CLANG_CMDLINE"
+        make $CLANG_CMDLINE
+        echo "=====Compile End====="
+    
+    - name: Package kernel with AnyKernel
+      id: package
+      if: (!cancelled()) && success()
+      working-directory: /workdir/kernel/out
+      run: |
+        cp -v arch/arm64/boot/Image /workdir/AnyKernel
+        cp -v $(cat modules.order) /workdir/AnyKernel/modules/system/lib/modules       
+    
+    - name: Upload
+      uses: actions/upload-artifact@main
+      if: (!cancelled()) && success() && env.UPLOAD_DIR == 'true'
+      with:
+        name: AnyKernel
+        path: /workdir/AnyKernel
+    
+    - name: Delete workflow runs
+      uses: GitRML/delete-workflow-runs@main
+      with:
+        retain_days: 1
+        keep_minimum_runs: 10
