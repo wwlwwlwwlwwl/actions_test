@@ -20,6 +20,10 @@ on:
         description: 'Kernel Config'     
         required: true
         default: 'vendor/venus-qgki_defconfig'
+      makeCommand:
+        description: 'Kernel make Command'     
+        required: true
+        default: '-j$(nproc --all) O=out ARCH=arm64 CC=clang CXX=clang++ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LD=ld.lld'
 
 env:
   UPLOAD_DIR: true
@@ -65,7 +69,7 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        export CLANG_CMDLINE="-j$(nproc --all) O=out ARCH=arm64 CC=clang CXX=clang++ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LD=ld.lld"
+        export CLANG_CMDLINE=${{ github.event.inputs.makeCommand }}
         cd kernel
         echo "=====Compile Start====="
         echo "Configure kernel config"
