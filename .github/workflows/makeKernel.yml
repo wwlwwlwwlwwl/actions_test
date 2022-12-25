@@ -33,13 +33,23 @@ jobs:
 #        submodules: 'recursive'
         fetch-depth: 0
         
-    - name: Get Prelude Clang
+    - name: Get WeebX Clang
       id: clang
       working-directory: /workdir
+      if: (!cancelled()) && success()
       run: |
-        git clone --recursive --depth 1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
+        wget "$(curl -s https://raw.githubusercontent.com/XSans0/WeebX-Clang/main/16.0.0/link.txt)" -O "weebx-clang.tar.gz"
+        mkdir clang && tar -xf weebx-clang.tar.gz -C clang && rm -rf weebx clang.tar.gz
         export PATH="/workdir/clang/bin:$PATH"
         echo $PATH >> $GITHUB_PATH
+        
+#    - name: Get Prelude Clang
+#      id: clang
+#      working-directory: /workdir
+#      run: |
+#        git clone --recursive --depth 1 https://gitlab.com/jjpprrrr/prelude-clang.git clang
+#        export PATH="/workdir/clang/bin:$PATH"
+#        echo $PATH >> $GITHUB_PATH
     
     - name: Get source code
       id: code
@@ -61,7 +71,7 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        export CLANG_CMDLINE="-j$(nproc --all) O=out ARCH=arm64 CC=clang CXX=clang++ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LD=ld.lld"
+        export CLANG_CMDLINE="-j$(nproc --all) O=out ARCH=arm64 LLVM_PATH=/workdir/clang/bin CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu-"
         cd kernel
         echo "=====Compile Start====="
         echo "Configure kernel config"
