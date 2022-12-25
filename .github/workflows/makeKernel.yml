@@ -71,7 +71,7 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        export CLANG_CMDLINE="-j$(nproc --all) O=out ARCH=arm64 LLVM_PATH=/workdir/clang/bin CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu-"
+        export CLANG_CMDLINE="-j$(nproc --all) O=out ARCH=arm64 LLVM=y LLVM_PATH=/workdir/clang/bin/ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu-"
         cd kernel
         echo "=====Compile Start====="
         echo "Configure kernel config"
