@@ -19,7 +19,7 @@ on:
       makeCommand:
         description: 'Kernel make Command'     
         required: true
-        default: '-j$(nproc --all) O=out CC=\"ccache clang\" ARCH=arm64 LLVM=y LLVM_PATH=/workdir/clang/bin/ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- KBUILD_BUILD_USER=\"github\" KBUILD_BUILD_HOST=\"github.com\"'
+        default: '-j$(nproc --all) O=out ARCH=arm64 LLVM=y LLVM_PATH=/workdir/clang/bin/ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu-'
 
 env:
   UPLOAD_DIR: true
@@ -78,13 +78,15 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
+        export KBUILD_BUILD_USER="GITHUB_ACTIONS" 
+        export KBUILD_BUILD_HOST="github.com"
         export CLANG_CMDLINE="${{ github.event.inputs.makeCommand }}"
         cd kernel
         echo "=====Compile Start====="
         echo "Configure kernel config"
-        make $CLANG_CMDLINE ${{ github.event.inputs.configFile }}
+        make CC="ccache clang" $CLANG_CMDLINE ${{ github.event.inputs.configFile }}
         echo "Start compile with cmdline: $CLANG_CMDLINE"
-        make $CLANG_CMDLINE
+        make CC="ccache clang" $CLANG_CMDLINE
         echo "=====Compile End====="
         ccache -s
     
