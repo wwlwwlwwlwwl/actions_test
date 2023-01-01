@@ -96,7 +96,7 @@ jobs:
       working-directory: /workdir/kernel/out
       run: |
         cp -v arch/arm64/boot/Image /workdir/AnyKernel
-        cp -v $(cat modules.order) /workdir/AnyKernel/modules/system/lib/modules       
+        cp -v $(cat modules.order) /workdir/AnyKernel/modules/system/vendor/lib/modules       
     
     - name: Upload
       uses: actions/upload-artifact@main
