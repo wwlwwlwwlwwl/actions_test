@@ -19,10 +19,9 @@ on:
       makeCommand:
         description: 'Kernel make Command'     
         required: true
-        default: '-j$(nproc --all) O=out ARCH=arm64 LLVM=y LLVM_PATH=/workdir/clang/bin/ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu-'
+        default: '-j$(nproc --all) O=out ARCH=arm64 LLVM=1 LLVM_PATH=/workdir/clang/bin/ CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu-'
 
 env:
-  UPLOAD_DIR: true
   TZ: Asia/Shanghai
 
 jobs:
@@ -90,17 +89,26 @@ jobs:
         echo "=====Compile End====="
         ccache -s
     
+    - name: Upload Kernel Binary
+      uses: actions/upload-artifact@main
+      if: (!cancelled()) && success()
+      with:
+        name: Kernel
+        path: /workdir/kernel/out/arch/arm64/boot/Image
+        
     - name: Package kernel with AnyKernel
       id: package
       if: (!cancelled()) && success()
       working-directory: /workdir/kernel/out
       run: |
         cp -v arch/arm64/boot/Image /workdir/AnyKernel
+        if [ -s ./module.order ] ; then 
         cp -v $(cat modules.order) /workdir/AnyKernel/modules/system/vendor/lib/modules       
+        fi
     
-    - name: Upload
+    - name: Upload Anykernel
       uses: actions/upload-artifact@main
-      if: (!cancelled()) && success() && env.UPLOAD_DIR == 'true'
+      if: (!cancelled()) && success()
       with:
         name: AnyKernel
         path: /workdir/AnyKernel
